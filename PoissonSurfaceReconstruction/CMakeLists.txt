@@ -39,14 +39,6 @@ endif()
 
 add_executable(PoissonSurfaceReconstruction main.cxx )
 
-message("----------------")
-message("${POINTSETPROCESSING_INCLUDE_DIR}")
-message("${POISSONRECONSTRUCTION_INCLUDE_DIR}")
-message("${POISSONRECONSTRUCTION_BINARY_DIR}")
-message("${POINTSETPROCESSING_LIBRARY}")
-message("${POISSONRECONSTRUCTION_LIBRARY}")
-message("----------------")
-
 target_include_directories(PoissonSurfaceReconstruction PUBLIC
   "${POINTSETPROCESSING_INCLUDE_DIR}"
   "${POISSONRECONSTRUCTION_INCLUDE_DIR}"
@@ -57,6 +49,11 @@ target_link_libraries(PoissonSurfaceReconstruction
   "${VTK_LIBRARIES}"
   "${POINTSETPROCESSING_LIBRARY}"
   "${POISSONRECONSTRUCTION_LIBRARY}"
+)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY
+  ${PoissonSurfaceReconstruction_BINARY_DIR}/bin
+  CACHE PATH "path for all executables"
 )
 
 add_subdirectory (Data)

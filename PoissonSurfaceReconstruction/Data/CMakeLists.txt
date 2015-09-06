@@ -1,7 +1,6 @@
 set(FILES_TO_COPY
-    points.vtk
     SpherePoints.vtp
-    RecordedModel_2015-09-04.vtk
+    RecordedModel_2015-09-04.vtp
     )
 
 foreach(FILENAME ${FILES_TO_COPY})

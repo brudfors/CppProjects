@@ -11,6 +11,10 @@
 #include "vtkPoissonReconstruction.h"
 #include "vtkPointSetNormalOrientation.h"
 
+#define MAIN_RETURN getch(); return 0;
+
+std::string dataFolderPath = "H:/_B/CppProjects/PoissonSurfaceReconstructionD/Data/"; // TODO: Relative paths are not working for some reason
+
 vtkSmartPointer<vtkPolyData> GetPointsFromCSV(const char* fileName);
 bool TestUnorganizedPointsToSurface(vtkPolyData* points, int KNearestNeighbors = 3, int depth = 10,
                                     unsigned int graphType = vtkPointSetNormalOrientation::KNN_GRAPH);
@@ -18,52 +22,16 @@ bool TestPoissonFromEstimatedNormalsWithOrientation(vtkPolyData* points, int dep
 
 int main(int argc, char *argv[])
 {
-  // Define reader and writer
   vtkSmartPointer<vtkXMLPolyDataReader> reader = vtkSmartPointer<vtkXMLPolyDataReader>::New();
 
-  // Read input data
-  reader->SetFileName("H:/bin/TestSurfaceRecontruction/R/Data/SpherePoints.vtp");
+  std::string path = dataFolderPath + "RecordedModel_2015-09-04.vtp"; // RecordedModel_2015-09-04.vtp SpherePoints.vtp
+  reader->SetFileName(path.c_str());
   reader->Update();
   vtkSmartPointer<vtkPolyData> points = vtkSmartPointer<vtkPolyData>::New();
   points = reader->GetOutput();
   TestUnorganizedPointsToSurface(points);
-  //points = reader->GetOutput();
-  //vtkSmartPointer<vtkPolyData> pointsCSV = vtkSmartPointer<vtkPolyData>::New();
-  //pointsCSV = GetPointsFromCSV("../Data/points.csv");
-  //TestUnorganizedPointsToSurface(points, 3, 20);
-  
-  /*reader->SetFileName("../Data/ouput_normalOrientation.vtp");
-  reader->Update();
-  vtkSmartPointer<vtkPolyData> pointsNormalOrientation = vtkSmartPointer<vtkPolyData>::New();
-  pointsNormalOrientation = reader->GetOutput();*/
-  //TestPoissonFromEstimatedNormalsWithOrientation(pointsNormalOrientation, 5);
 
-  getch();
-  return 0;
-}
-
-bool TestPoissonFromEstimatedNormalsWithOrientation(vtkPolyData* points, int depth)
-{
-  vtkSmartPointer<vtkXMLPolyDataWriter> writer = vtkSmartPointer<vtkXMLPolyDataWriter>::New();
-
-  if (points->GetNumberOfPoints() > 0)
-  {
-    std::cout << "STATUS: Poisson reconstruction..." << std::endl;
-    vtkSmartPointer<vtkPoissonReconstruction> poissonFilter = vtkSmartPointer<vtkPoissonReconstruction>::New();
-    poissonFilter->SetDepth(depth);
-    poissonFilter->SetInputData(points);
-    poissonFilter->Update();
-
-    writer->SetInputData(poissonFilter->GetOutput());
-    writer->SetFileName("H:/bin/TestSurfaceRecontruction/R/Data/ouput_poisson.vtp");
-    writer->Update();
-    return true;
-  }
-  else
-  {
-    std::cout << "ERROR: Input data contains zero points!" << std::endl;
-    return false;
-  }
+  MAIN_RETURN
 }
 
 bool TestUnorganizedPointsToSurface(vtkPolyData* points, int KNearestNeighbors, int depth, unsigned int graphType)
@@ -72,6 +40,8 @@ bool TestUnorganizedPointsToSurface(vtkPolyData* points, int KNearestNeighbors, 
 
   if (points->GetNumberOfPoints() > 0)
   {
+    std::string path;
+
     // Start timer
     vtkSmartPointer<vtkTimerLog> timer = vtkSmartPointer<vtkTimerLog>::New();
     timer->StartTimer();
@@ -82,7 +52,8 @@ bool TestUnorganizedPointsToSurface(vtkPolyData* points, int KNearestNeighbors, 
     normalEstimation->Update();
 
     writer->SetInputData(normalEstimation->GetOutput());
-    writer->SetFileName("H:/bin/TestSurfaceRecontruction/R/Data/ouput_normalEstimation.vtp");
+    path = dataFolderPath + "ouput_normalEstimation.vtp";
+    writer->SetFileName(path.c_str());
     writer->Update();
 
     std::cout << "STATUS: Estimate normals orientation..." << std::endl;
@@ -93,7 +64,8 @@ bool TestUnorganizedPointsToSurface(vtkPolyData* points, int KNearestNeighbors, 
     normalOrientationFilter->Update();
 
     writer->SetInputData(normalOrientationFilter->GetOutput());
-    writer->SetFileName("H:/bin/TestSurfaceRecontruction/R/Data/ouput_normalOrientation.vtp");
+    path = dataFolderPath + "ouput_normalOrientation.vtp";
+    writer->SetFileName(path.c_str());
     writer->Update();
 
     std::cout << "STATUS: Poisson reconstruction..." << std::endl;
@@ -103,12 +75,40 @@ bool TestUnorganizedPointsToSurface(vtkPolyData* points, int KNearestNeighbors, 
     poissonFilter->Update();
 
     writer->SetInputData(poissonFilter->GetOutput());
-    writer->SetFileName("H:/bin/TestSurfaceRecontruction/R/Data/ouput_poisson.vtp");
+    path = dataFolderPath + "ouput_poisson.vtp";
+    writer->SetFileName(path.c_str());
     writer->Update();
 
     // Output runtime
     timer->StopTimer();
     std::cout << "STATUS: Elapsed time: " << 	timer->GetElapsedTime() << std::endl;
+    return true;
+  }
+  else
+  {
+    std::cout << "ERROR: Input data contains zero points!" << std::endl;
+    return false;
+  }
+}
+
+bool TestPoissonFromEstimatedNormalsWithOrientation(vtkPolyData* points, int depth)
+{
+  vtkSmartPointer<vtkXMLPolyDataWriter> writer = vtkSmartPointer<vtkXMLPolyDataWriter>::New();
+
+  if (points->GetNumberOfPoints() > 0)
+  {
+    std::string path;
+
+    std::cout << "STATUS: Poisson reconstruction..." << std::endl;
+    vtkSmartPointer<vtkPoissonReconstruction> poissonFilter = vtkSmartPointer<vtkPoissonReconstruction>::New();
+    poissonFilter->SetDepth(depth);
+    poissonFilter->SetInputData(points);
+    poissonFilter->Update();
+
+    writer->SetInputData(poissonFilter->GetOutput());
+    path = dataFolderPath + "ouput_poisson.vtp";
+    writer->SetFileName(path.c_str());
+    writer->Update();
     return true;
   }
   else
